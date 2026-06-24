@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#604ba3">
+  <title>В Поход!</title>
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Походы Первых. Больше, чем путешествие</p>
+        <h1>В Поход!</h1>
+      </div>
+      <nav class="topbar__actions" aria-label="Навигация">
+        <a href="rules.html" class="button button--ghost">Правила</a>
+        <button id="newGameTopBtn" class="button button--ghost" type="button">Новая партия</button>
+      </nav>
+    </header>
+
+    <main>
+      <section id="setupScreen" class="setup-screen" aria-labelledby="setupTitle">
+        <div class="intro-card">
+          <p class="eyebrow">Кооперативная игра-путешествие</p>
+          <h2 id="setupTitle">Соберите команду и дойдите до главной цели</h2>
+          <p>
+            Карта на старте закрыта. Открыты только База и цели маршрута. Игроки выбирают уникальные роли,
+            помогают друг другу, открывают местность и идут к финишу всей командой.
+          </p>
+          <div class="setup-controls">
+            <label>
+              Количество игроков
+              <select id="playerCountSelect">
+                <option value="2">2 игрока</option>
+                <option value="3">3 игрока</option>
+                <option value="4" selected>4 игрока</option>
+                <option value="5">5 игроков</option>
+                <option value="6">6 игроков</option>
+              </select>
+            </label>
+            <label>
+              Размер карты
+              <select id="mapSizeSelect">
+                <option value="4">Маленькая 4 на 4</option>
+                <option value="5">Средняя 5 на 5</option>
+                <option value="6" selected>Большая 6 на 6</option>
+              </select>
+            </label>
+          </div>
+          <div id="playerNameFields" class="name-fields" aria-label="Имена игроков"></div>
+          <div class="assignment-panel" aria-live="polite">
+            <div class="assignment-panel__head">
+              <h3>Кому какая роль досталась</h3>
+              <p>Роли назначаются по порядку: первая выбранная карточка — игроку 1, вторая — игроку 2 и так далее.</p>
+            </div>
+            <div id="roleAssignments" class="assignment-list"></div>
+          </div>
+          <button id="startGameBtn" class="button button--primary" type="button" disabled>Начать поход</button>
+          <p id="setupHint" class="hint">Выберите 4 роли для команды.</p>
+        </div>
+
+        <div class="role-picker-panel">
+          <div class="section-heading">
+            <p class="eyebrow">Роли</p>
+            <h2>Выбор персонажей</h2>
+          </div>
+          <div id="roleGrid" class="role-grid"></div>
+        </div>
+      </section>
+
+      <section id="gameScreen" class="game-screen hidden" aria-label="Игровое поле">
+        <aside class="side-panel">
+          <section class="panel panel--status">
+            <div class="status-line">
+              <span>Раунд</span>
+              <strong id="roundLabel">1</strong>
+            </div>
+            <div class="status-line">
+              <span>Погода</span>
+              <strong id="weatherLabel">Облачность</strong>
+            </div>
+            <p id="weatherText" class="small-text">Нейтрально.</p>
+          </section>
+
+          <section class="panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Текущий ход</p>
+              <h2 id="currentPlayerName">Игрок</h2>
+            </div>
+            <div id="currentRoleCard" class="current-role-card"></div>
+            <div class="turn-stats">
+              <div>
+                <span>Кубик</span>
+                <strong id="dieLabel">не брошен</strong>
+              </div>
+              <div>
+                <span>Очки хода</span>
+                <strong id="movesLabel">0</strong>
+              </div>
+            </div>
+            <div class="control-stack">
+              <button id="rollBtn" class="button button--primary" type="button">Бросить кубик</button>
+              <button id="roleActionBtn" class="button" type="button">Особое действие</button>
+              <button id="tradeBtn" class="button" type="button">Обмен</button>
+              <button id="endTurnBtn" class="button button--ghost" type="button">Закончить ход</button>
+            </div>
+            <p id="turnHelp" class="hint"></p>
+          </section>
+
+          <section class="panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Команда</p>
+              <h2>Участники</h2>
+            </div>
+            <div id="teamList" class="team-list"></div>
+          </section>
+        </aside>
+
+        <section class="board-area">
+          <div class="board-toolbar">
+            <div>
+              <p class="eyebrow">Карта маршрута</p>
+              <h2>База → Промежуточная цель → Главная цель</h2>
+            </div>
+            <div class="resource-pills">
+              <span class="pill">Жетоны истории: <strong id="storyTokensLabel">0</strong></span>
+              <span class="pill">Открыто: <strong id="revealedLabel">0</strong></span>
+            </div>
+          </div>
+          <div id="board" class="board" aria-label="Карта"></div>
+          <div class="legend">
+            <span><i class="legend-swatch legend-swatch--hidden"></i> закрытая карточка</span>
+            <span><i class="legend-swatch legend-swatch--reachable"></i> доступно для хода</span>
+            <span><i class="legend-swatch legend-swatch--current"></i> текущий игрок</span>
+          </div>
+        </section>
+
+        <aside class="log-panel panel">
+          <div class="section-heading compact">
+            <p class="eyebrow">Дневник</p>
+            <h2>История похода</h2>
+          </div>
+          <div id="logList" class="log-list" aria-live="polite"></div>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal__backdrop" data-close-modal></div>
+    <div class="modal__content">
+      <button class="modal__close" type="button" data-close-modal>Закрыть</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <template id="roleCardTemplate">
+    <article class="role-card" tabindex="0">
+      <div class="role-card__image-wrap">
+        <img class="role-card__image" alt="">
+      </div>
+      <div class="role-card__body">
+        <h3></h3>
+        <p class="role-card__quote"></p>
+        <dl>
+          <dt>Постоянное действие</dt>
+          <dd data-role-permanent></dd>
+          <dt>Особое действие</dt>
+          <dd data-role-special></dd>
+          <dt>Навык</dt>
+          <dd data-role-skill></dd>
+        </dl>
+      </div>
+      <span class="role-card__selected">Выбрано</span>
+      <span class="role-card__assigned"></span>
+    </article>
+  </template>
+
+  <script src="js/data.js" defer></script>
+  <script src="js/game.js" defer></script>
+  <script src="js/ui.js" defer></script>
+</body>
+</html>
